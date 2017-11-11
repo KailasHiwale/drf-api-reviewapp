@@ -1,3 +1,5 @@
+from django.utils.six import BytesIO
+from rest_framework.                                                                                                                                                                                                                                            
 from rest_framework import generics
 from rest_framework.response import Response
 # from django.http import HttpResponse
@@ -14,7 +16,7 @@ class CourseViewset(generics.ListAPIView):
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        pass
+        json
 
     def put(self, request, pk, *args, **kwargs):
         pass
