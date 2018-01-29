@@ -4,59 +4,64 @@ to Python 2/3 than when porting existing Python 2 code to 2/3
 """
 from __future__ import unicode_literals
 
-from django.db import models
-from django.core.validators import (
-    MaxValueValidator,
-    MinValueValidator,
-    validate_email,
-    RegexValidator,
-    MinLengthValidator)
+from review.models.institute import Institute
 
 
-class Institute(models.Model):
-    """Model for institute details"""
-    GOVERNMENT = 'GO'
-    GOVERNMENT_AUTONOMOUS = 'GA'
-    PRIVATE = 'PR'
-    INSTITUTE_TYPE = (
-        (GOVERNMENT, 'Government'),
-        (GOVERNMENT_AUTONOMOUS, 'Government Autonomous'),
-        (PRIVATE, 'Private'),)
-    id = models.AutoField(primary_key=True)
-    institute_name = models.CharField(max_length=254)
-    address = models.CharField(max_length=254)
-    pin_code = models.IntegerField(
-        validators=[MinValueValidator(100000), MaxValueValidator(999999)],
-        blank=True,
-        null=True)
-    office_mail = models.EmailField(
-        max_length=254,
-        unique=True,
-        validators=[validate_email],
-        blank=True,
-        null=True)
-    phone_number = models.CharField(
-        max_length=14,
-        validators=[RegexValidator(r'^\d{1,10}$'), MinLengthValidator(10)],
-        blank=True,
-        null=True)
-    website = models.URLField(max_length=150, blank=True, null=True)
-    institute_type = models.CharField(
-        max_length=150,
-        choices=INSTITUTE_TYPE,
-        default=GOVERNMENT,
-        blank=True,
-        null=True)
-    founded_in = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(2017)],
-        blank=True,
-        null=True)
-    affiliated_to = models.CharField(max_length=150, blank=True, null=True)
-    approved_by = models.CharField(max_length=254, blank=True, null=True)
-
-    def __str__(self):
-        return self.institute_name
+class InstituteSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+    institute_name = serializers.CharField()
+    address = serializers.CharField()
+    pin_code = serializers.IntegerField(required=False)
+    office_mail = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(required=False)
+    website = serializers.URLField(required=False)
+    institute_type = serializers.CharField(required=False)
+    founded_in = serializers.IntegerField(required=False)
+    affiliated_to = serializers.CharField(required=False)
+    approved_by = serializers.CharField(required=False)
 
     class Meta:
-        managed = False
-        db_table = 'institute'
+        model = Institute
+        fields = (
+            'id',
+            'institute_name',
+            'address',
+            'pin_code',
+            'office_mail',
+            'phone_number',
+            'website',
+            'institute_type',
+            'founded_in',
+            'affiliated_to',
+            'approved_by')
+
+    def create(self, validated_data):
+        return Institute.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.institute_name = validated_data.get(
+            'institute_name', instance.institute_name)
+        instance.address = validated_data.get(
+            'address', instance.address)
+        instance.pin_code = validated_data.get(
+            'pin_code', instance.pin_code)
+        instance.office_mail = validated_data.get(
+            'office_mail', instance.office_mail)
+        instance.phone_number = validated_data.get(
+            'phone_number', instance.phone_number)
+        instance.website = validated_data.get('website', instance.website)
+        instance.institute_type = validated_data.get(
+            'institute_type', instance.institute_type)
+        instance.founded_in = validated_data.get(
+            'founded_in', instance.founded_in)
+        instance.affiliated_to = validated_data.get(
+            'affiliated_to', instance.affiliated_to)
+        instance.approved_by = validated_data.get(
+            'approved_by', instance.approved_by)
+        instance.save()
+        return instance
+
+    def delete(self, instance):
+        instance.delete()
+        return True
+
